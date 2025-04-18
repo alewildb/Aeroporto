@@ -5,7 +5,7 @@ public class Utente_Generico {
     private String nome;
     private String cognome;
     private String numero_Documento;
-    private ArrayList<Prenotazione> prenotazioni = new ArrayList<>();
+    private ArrayList<Prenotazione> prenotazioni = new ArrayList<>(); //verranno create tramite il metodo prenota_Volo()
     public Utente_Generico(String nome, String cognome, String numero_Documento) {
         this.nome = nome;
         this.cognome = cognome;
