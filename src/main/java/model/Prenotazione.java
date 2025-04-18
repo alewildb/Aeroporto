@@ -58,5 +58,6 @@ public class Prenotazione {
         this.stato_Prenotazione = stato_Prenotazione;
     }
 
-
+    //prototipi
+    public void check_In(){};
 }
