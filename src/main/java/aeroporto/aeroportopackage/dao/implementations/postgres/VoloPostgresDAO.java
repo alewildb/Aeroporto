@@ -159,8 +159,30 @@ public class VoloPostgresDAO implements VoloDAO {
                 "giorno_partenza = ?, mese_partenza = ?, anno_partenza = ?, orario_previsto = ?, minuti_ritardo = ?, " +
                 "stato_volo = ?, tipo_volo = ?, gate_id = ? WHERE codice_univoco = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            setVoloStatementParameters(pstmt, volo);
-            pstmt.setString(12, volo.getCodiceUnivoco());
+            pstmt.setString(1, volo.getCompagniaAerea());
+            pstmt.setString(2, volo.getAeroportoPartenza());
+            pstmt.setString(3, volo.getAeroportoArrivo());
+            pstmt.setInt(4, volo.getGiornoPartenza());
+            pstmt.setInt(5, volo.getMesePartenza());
+            pstmt.setInt(6, volo.getAnnoPartenza());
+            pstmt.setString(7, volo.getOrarioPrevisto());
+            pstmt.setInt(8, volo.getMinutiRitardo());
+            pstmt.setString(9, volo.getStatoVolo().name());
+
+            if (volo instanceof VoloPartenza voloPartenza) {
+                pstmt.setString(10, "PARTENZA");
+                Gate gate = voloPartenza.getGate();
+                if (gate != null && gate.getId() > 0) {
+                    pstmt.setInt(11, gate.getId());
+                } else {
+                    pstmt.setNull(11, Types.INTEGER);
+                }
+            } else {
+                pstmt.setString(10, "ARRIVO");
+                pstmt.setNull(11, Types.INTEGER);
+            }
+
+            pstmt.setString(12, volo.getCodiceUnivoco()); // Imposta il codice_univoco per la clausola WHERE
             pstmt.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Errore during l'aggiornamento del volo: " + e.getMessage(), e);

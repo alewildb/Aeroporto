@@ -56,6 +56,14 @@ public class AdminHomePanel extends JPanel {
     private DefaultTableModel lostBaggageTableModel;
 
     /**
+     * The font.
+     */
+    private final String adminFont = "SansSerif";
+    /**
+     * dsavjink.
+     */
+    private final String noFlight = "Nessun Volo Selezionato";
+    /**
      * Instantiates a new Admin home panel.
      *
      * @param mainFrame     the main frame
@@ -81,7 +89,7 @@ public class AdminHomePanel extends JPanel {
         topPanel.setOpaque(false);
         Amministratore admin = (Amministratore) appController.getUtenteCorrente();
         welcomeLabel = new JLabel("Benvenuto Amministratore: " + (admin != null ? admin.getLogin() : ""), SwingConstants.CENTER);
-        welcomeLabel.setFont(new Font("SansSerif", Font.BOLD, 22));
+        welcomeLabel.setFont(new Font(adminFont, Font.BOLD, 22));
         topPanel.add(welcomeLabel, BorderLayout.CENTER);
 
         JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
@@ -98,7 +106,7 @@ public class AdminHomePanel extends JPanel {
 
         // Struttura a schede
         JTabbedPane tabbedPane = new JTabbedPane();
-        tabbedPane.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        tabbedPane.setFont(new Font(adminFont, Font.PLAIN, 14));
 
         JPanel flightsManagementPanel = createFlightsManagementPanel();
         tabbedPane.addTab("Gestione Voli", new FlatSVGIcon("icons/plane.svg"), flightsManagementPanel);
@@ -125,7 +133,7 @@ public class AdminHomePanel extends JPanel {
         flightsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         flightsTable.setAutoCreateRowSorter(true);
         flightsTable.setRowHeight(28);
-        flightsTable.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 14));
+        flightsTable.getTableHeader().setFont(new Font(adminFont, Font.BOLD, 14));
         flightsTable.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -182,7 +190,7 @@ public class AdminHomePanel extends JPanel {
         allBaggageTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         allBaggageTable.setAutoCreateRowSorter(true);
         allBaggageTable.setRowHeight(28);
-        allBaggageTable.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 14));
+        allBaggageTable.getTableHeader().setFont(new Font(adminFont, Font.BOLD, 14));
         allBaggagePanel.add(new JScrollPane(allBaggageTable), BorderLayout.CENTER);
         JButton updateBaggageStatusButton = new JButton("Aggiorna Stato Bagaglio Selezionato");
         updateBaggageStatusButton.addActionListener(e -> updateSelectedBaggageStatusAction());
@@ -201,7 +209,7 @@ public class AdminHomePanel extends JPanel {
         lostBaggageTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         lostBaggageTable.setAutoCreateRowSorter(true);
         lostBaggageTable.setRowHeight(28);
-        lostBaggageTable.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 14));
+        lostBaggageTable.getTableHeader().setFont(new Font(adminFont, Font.BOLD, 14));
         lostBaggagePanel.add(new JScrollPane(lostBaggageTable), BorderLayout.CENTER);
         splitPane.setBottomComponent(lostBaggagePanel);
 
@@ -361,7 +369,7 @@ public class AdminHomePanel extends JPanel {
         if (selectedVolo != null) {
             openFlightDialog(selectedVolo, false);
         } else {
-            JOptionPane.showMessageDialog(this, "Seleziona un volo dalla tabella per aggiornarlo.", "Nessun Volo Selezionato", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Seleziona un volo dalla tabella per aggiornarlo.", noFlight, JOptionPane.WARNING_MESSAGE);
         }
     }
 
@@ -374,7 +382,7 @@ public class AdminHomePanel extends JPanel {
         if (selectedVolo != null) {
             openFlightDialog(selectedVolo, true);
         } else {
-            JOptionPane.showMessageDialog(this, "Seleziona un volo dalla tabella per visualizzarlo.", "Nessun Volo Selezionato", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Seleziona un volo dalla tabella per visualizzarlo.", noFlight, JOptionPane.WARNING_MESSAGE);
         }
     }
 
@@ -398,7 +406,7 @@ public class AdminHomePanel extends JPanel {
                 }
             }
         } else {
-            JOptionPane.showMessageDialog(this, "Seleziona un volo dalla tabella per eliminarlo.", "Nessun Volo Selezionato", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Seleziona un volo dalla tabella per eliminarlo.", noFlight, JOptionPane.WARNING_MESSAGE);
         }
     }
 

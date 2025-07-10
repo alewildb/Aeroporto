@@ -5,9 +5,11 @@ import aeroporto.aeroportopackage.model.*;
 
 import javax.swing.*;
 import java.awt.*;
+import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 /**
  * The Flight dialog. This dialog is crucial in the application.
@@ -92,6 +94,15 @@ public class FlightDialog extends JDialog {
      * The cancel button.
      */
     private JButton cancelButton;
+    /**
+     * sdfgsdfg
+     */
+    private final String validError = "Errore Validazione";
+    /**
+     * sdfgsdfg
+     */
+    private final String partenza = "Partenza";
+
 
     /**
      * Instantiates a new Flight dialog.
@@ -126,11 +137,10 @@ public class FlightDialog extends JDialog {
         setLocationRelativeTo(owner);
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
     }
-
     /**
      * Initializes dialog's components.
      */
-        private void initComponents() {
+    private void initComponents() {
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 10, 5, 10);
@@ -148,7 +158,7 @@ public class FlightDialog extends JDialog {
         gbc.gridx = 1; gbc.gridy = yPos++; gbc.gridwidth = 2; add(compagniaField, gbc); gbc.gridwidth = 1;
 
         gbc.gridx = 0; gbc.gridy = yPos; add(new JLabel("Tipo Volo:"), gbc);
-        tipoVoloComboBox = new JComboBox<>(new String[]{"Partenza", "Arrivo"});
+        tipoVoloComboBox = new JComboBox<>(new String[]{partenza, "Arrivo"});
         tipoVoloComboBox.addActionListener(e -> setupInteractions());
         gbc.gridx = 1; gbc.gridy = yPos++; gbc.gridwidth = 2; add(tipoVoloComboBox, gbc); gbc.gridwidth = 1;
 
@@ -199,7 +209,6 @@ public class FlightDialog extends JDialog {
         saveButton.addActionListener(e -> saveFlight());
         cancelButton.addActionListener(e -> dispose());
     }
-
     /**
      * Populates the fields with the flight's value if the flight exists.
      * If the flight does not exist, the fields get initialized with default values.
@@ -219,7 +228,7 @@ public class FlightDialog extends JDialog {
             statoVoloComboBox.setSelectedItem(currentVolo.getStatoVolo());
 
             if (currentVolo instanceof VoloPartenza) {
-                tipoVoloComboBox.setSelectedItem("Partenza");
+                tipoVoloComboBox.setSelectedItem(partenza);
                 Gate currentGate = ((VoloPartenza) currentVolo).getGate();
                 gateComboBox.setSelectedItem(new GateWrapper(currentGate));
             } else if (currentVolo instanceof VoloArrivo) {
@@ -227,20 +236,19 @@ public class FlightDialog extends JDialog {
                 gateComboBox.setSelectedItem(new GateWrapper(null));
             }
         } else {
-            tipoVoloComboBox.setSelectedItem("Partenza");
+            tipoVoloComboBox.setSelectedItem(partenza);
             statoVoloComboBox.setSelectedItem(StatoVolo.PROGRAMMATO);
             orarioPrevistoField.setText("12:00");
             minutiRitardoField.setText("0");
         }
     }
-
     /**
      * Sets the dynamic interactions of the window.
      * It checks if the flight is an arrival or a departure in order to make the "Napoli" string from the
      * destination/arrival airport not editable. It also shows or hides the gate selection.
      */
     private void setupInteractions() {
-        boolean isPartenza = "Partenza".equals(tipoVoloComboBox.getSelectedItem());
+        boolean isPartenza = partenza.equals(tipoVoloComboBox.getSelectedItem());
         gateLabel.setVisible(isPartenza);
         gateComboBox.setVisible(isPartenza);
         gateComboBox.setEnabled(isPartenza && !readOnlyMode);
@@ -273,6 +281,106 @@ public class FlightDialog extends JDialog {
     }
 
     /**
+     * Checks if the entered date is valid.
+     * @param anno The year.
+     * @param mese The month.
+     * @param giorno The day.
+     * @return true if the date is valid, false otherwise.
+     */
+    private boolean isDataValida(int anno, int mese, int giorno) {
+        if (anno <= 0 || mese <= 0 || giorno <= 0) {
+            return false;
+        }
+        try {
+            LocalDate.of(anno, mese, giorno);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Checks if the time format is valid (HH:MM).
+     * @param orario The time string to validate.
+     * @return true if the time is valid, false otherwise.
+     */
+    private boolean isOrarioValido(String orario) {
+        if (orario == null || orario.trim().isEmpty()) {
+            return false;
+        }
+        return Pattern.matches("^([01]?[0-9]|2[0-3]):[0-5][0-9]$", orario);
+    }
+    /**
+     * Saves form's data into the database.
+     * It's used to either update or insert the flight.
+     * It checks if the flight is an arrival or a departure and sets the flight type variable.
+     */
+    private void saveFlight() {
+        try {
+            String codice = codiceField.getText().trim();
+            if (codice.isEmpty()){
+                JOptionPane.showMessageDialog(this, "Il codice del volo è obbligatorio.", validError, JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            if (currentVolo == null && appController.getVoloDAO().findByCodice(codice) != null) {
+                JOptionPane.showMessageDialog(this, "Codice volo già esistente.", validError, JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            int giorno = Integer.parseInt(giornoField.getText());
+            int mese = Integer.parseInt(meseField.getText());
+            int anno = Integer.parseInt(annoField.getText());
+
+            if (!isDataValida(anno, mese, giorno)) {
+                JOptionPane.showMessageDialog(this, "Data non valida. Controllare giorno, mese e anno.", "Errore Data", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            String orario = orarioPrevistoField.getText().trim();
+            if (!isOrarioValido(orario)) {
+                JOptionPane.showMessageDialog(this, "Formato orario non valido. Usare HH:MM (es. 14:30).", "Errore Orario", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            Volo voloDaSalvare;
+            String tipoVolo = (String) tipoVoloComboBox.getSelectedItem();
+
+            if (partenza.equals(tipoVolo)) {
+                GateWrapper gateWrapper = (GateWrapper) gateComboBox.getSelectedItem();
+                Gate gate = (gateWrapper != null) ? gateWrapper.getGate() : null;
+                if (gate == null) {
+                    JOptionPane.showMessageDialog(this, "Un volo di partenza deve avere un gate.", validError, JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                voloDaSalvare = new VoloPartenza(codice, compagniaField.getText().trim(), aeroportoArrivoField.getText().trim(),
+                        giorno, mese, anno,
+                        orario, Integer.parseInt(minutiRitardoField.getText()), gate);
+            } else {
+                voloDaSalvare = new VoloArrivo(codice, compagniaField.getText().trim(), aeroportoPartenzaField.getText().trim(),
+                        giorno, mese, anno,
+                        orario, Integer.parseInt(minutiRitardoField.getText()));
+            }
+
+            voloDaSalvare.setStatoVolo((StatoVolo) statoVoloComboBox.getSelectedItem());
+
+            if (currentVolo == null) {
+                appController.getVoloDAO().save(voloDaSalvare);
+            } else {
+                appController.getVoloDAO().update(voloDaSalvare);
+            }
+
+            dataChanged = true;
+            dispose();
+
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Giorno, Mese, Anno e Ritardo devono essere numeri validi.", "Errore Formato Numerico", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Errore: " + e.getMessage(), "Errore Operazione", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    /**
      * Sets the fields editable or not editable based on what the user is doing.
      * If it's the admin editing the flight, the fields are editable, otherwise they're not.
      * @param editable true if fields should be editable, false otherwise.
@@ -295,64 +403,6 @@ public class FlightDialog extends JDialog {
         statoVoloComboBox.setEnabled(editable);
         tipoVoloComboBox.setEnabled(editable && currentVolo == null);
     }
-
-    /**
-     * Saves form's data into the database.
-     * It's used to either update or insert the flight.
-     * It checks if the flight is an arrival or a departure and sets the flight type variable.
-     */
-    private void saveFlight() {
-        try {
-            String codice = codiceField.getText().trim();
-            if (codice.isEmpty()){
-                JOptionPane.showMessageDialog(this, "Il codice del volo è obbligatorio.", "Errore Validazione", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            if (currentVolo == null && appController.getVoloDAO().findByCodice(codice) != null) {
-                JOptionPane.showMessageDialog(this, "Codice volo già esistente.", "Errore Validazione", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            Volo voloDaSalvare;
-            String tipoVolo = (String) tipoVoloComboBox.getSelectedItem();
-
-            if ("Partenza".equals(tipoVolo)) {
-                GateWrapper gateWrapper = (GateWrapper) gateComboBox.getSelectedItem();
-                Gate gate = (gateWrapper != null) ? gateWrapper.getGate() : null;
-                if (gate == null) {
-                    JOptionPane.showMessageDialog(this, "Un volo di partenza deve avere un gate.", "Errore Validazione", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-                voloDaSalvare = new VoloPartenza(codice, compagniaField.getText().trim(), aeroportoArrivoField.getText().trim(),
-                        Integer.parseInt(giornoField.getText()), Integer.parseInt(meseField.getText()), Integer.parseInt(annoField.getText()),
-                        orarioPrevistoField.getText(), Integer.parseInt(minutiRitardoField.getText()), gate);
-            } else {
-                voloDaSalvare = new VoloArrivo(codice, compagniaField.getText().trim(), aeroportoPartenzaField.getText().trim(),
-                        Integer.parseInt(giornoField.getText()), Integer.parseInt(meseField.getText()), Integer.parseInt(annoField.getText()),
-                        orarioPrevistoField.getText(), Integer.parseInt(minutiRitardoField.getText()));
-            }
-
-            voloDaSalvare.setStatoVolo((StatoVolo) statoVoloComboBox.getSelectedItem());
-
-            if (currentVolo == null) {
-                appController.getVoloDAO().save(voloDaSalvare);
-            } else {
-                appController.getVoloDAO().update(voloDaSalvare);
-            }
-
-            dataChanged = true;
-            dispose();
-
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Giorno, Mese, Anno e Ritardo devono essere numeri validi.", "Errore Formato Numerico", JOptionPane.ERROR_MESSAGE);
-        } catch (DateTimeParseException e) {
-            JOptionPane.showMessageDialog(this, "Data non valida: " + e.getMessage(), "Errore Data", JOptionPane.ERROR_MESSAGE);
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Errore: " + e.getMessage(), "Errore Operazione", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
     /**
      * Checks if the data has changed.
      *
@@ -361,7 +411,6 @@ public class FlightDialog extends JDialog {
     public boolean isDataChanged() {
         return dataChanged;
     }
-
     /**
      * This is an internal class (a wrapper class) used to visualize the gate objects in the combobox and to handle the
      * "no gate" ("-- Nessun Gate --") scenario.
@@ -371,22 +420,31 @@ public class FlightDialog extends JDialog {
          * The Gate object.
          */
         private Gate gate;
-
         /**
          * Instantiates a new Gate wrapper.
          *
          * @param gate the gate
          */
         public GateWrapper(Gate gate) { this.gate = gate; }
-
         /**
          * Gets gate.
          *
          * @return the gate
          */
         public Gate getGate() { return gate; }
-        @Override public String toString() { return gate == null ? "-- Nessun Gate --" : "Gate " + gate.getNumeroGate(); }
-        @Override public boolean equals(Object o) { if (this == o) return true; if (o == null || getClass() != o.getClass()) return false; GateWrapper that = (GateWrapper) o; return Objects.equals(gate, that.gate); }
-        @Override public int hashCode() { return Objects.hash(gate); }
+        @Override
+        public String toString() {
+            return gate == null ? "-- Nessun Gate --" : "Gate " + gate.getNumeroGate();
+        }
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            GateWrapper that = (GateWrapper) o;
+            return Objects.equals(gate, that.gate);
+        }
+        @Override public int hashCode() {
+            return Objects.hash(gate);
+        }
     }
 }

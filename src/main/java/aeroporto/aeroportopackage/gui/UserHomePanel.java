@@ -45,22 +45,29 @@ public class UserHomePanel extends JPanel {
      */
     private JTextField searchAvailableFlightsField;
     /**
-     * The My bookings table.
+     * The "My bookings" table.
      */
     private JTable myBookingsTable;
     /**
-     * The My bookings table model.
+     * The "My bookings" table model.
      */
     private DefaultTableModel myBookingsTableModel;
     /**
      * The Search my bookings field.
      */
-    private JTextField searchMyBookingsField; // Aggiunto per la ricerca nelle prenotazioni
+    private JTextField searchMyBookingsField;
     /**
      * The Font name.
      */
-    private final String font = "SansSerif";
-
+    private static final String userFont = "SansSerif";
+    /**
+     * asfgdobhikju.
+     */
+    private final String noBookingSelected = "Nessuna Prenotazione Selezionata";
+    /**
+     * search icon
+     */
+    private final String searchIcon = "icons/search.svg";
     /**
      * Instantiates a new User home panel.
      *
@@ -86,7 +93,7 @@ public class UserHomePanel extends JPanel {
         topPanel.setOpaque(false);
         UtenteGenerico user = (UtenteGenerico) appController.getUtenteCorrente();
         welcomeLabel = new JLabel("Benvenuto: " + (user != null ? user.getNome() + " " + user.getCognome() : ""), SwingConstants.CENTER);
-        welcomeLabel.setFont(new Font(font, Font.BOLD, 22));
+        welcomeLabel.setFont(new Font(userFont, Font.BOLD, 22));
         topPanel.add(welcomeLabel, BorderLayout.CENTER);
 
         JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
@@ -102,10 +109,10 @@ public class UserHomePanel extends JPanel {
         add(topPanel, BorderLayout.NORTH);
 
         JTabbedPane tabbedPane = new JTabbedPane();
-        tabbedPane.setFont(new Font(font, Font.PLAIN, 14));
+        tabbedPane.setFont(new Font(userFont, Font.PLAIN, 14));
 
         JPanel availableFlightsPanel = createAvailableFlightsPanel();
-        tabbedPane.addTab("Cerca e Prenota Voli", new FlatSVGIcon("icons/search.svg"), availableFlightsPanel);
+        tabbedPane.addTab("Cerca e Prenota Voli", new FlatSVGIcon(searchIcon), availableFlightsPanel);
 
         JPanel myBookingsPanel = createMyBookingsPanel();
         tabbedPane.addTab("Le Mie Prenotazioni", new FlatSVGIcon("icons/book-open.svg"), myBookingsPanel);
@@ -125,7 +132,7 @@ public class UserHomePanel extends JPanel {
         searchPanel.add(new JLabel("Cerca per Codice, Partenza o Arrivo:"));
         searchAvailableFlightsField = new JTextField(25);
         searchPanel.add(searchAvailableFlightsField);
-        JButton searchButton = new JButton("Cerca", new FlatSVGIcon("icons/search.svg"));
+        JButton searchButton = new JButton("Cerca", new FlatSVGIcon(searchIcon));
         searchButton.addActionListener(e -> loadAvailableFlightsData());
         searchPanel.add(searchButton);
         panel.add(searchPanel, BorderLayout.NORTH);
@@ -136,14 +143,14 @@ public class UserHomePanel extends JPanel {
         };
         availableFlightsTable = new JTable(availableFlightsTableModel);
         availableFlightsTable.setRowHeight(28);
-        availableFlightsTable.getTableHeader().setFont(new Font(font, Font.BOLD, 14));
+        availableFlightsTable.getTableHeader().setFont(new Font(userFont, Font.BOLD, 14));
         availableFlightsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         availableFlightsTable.setAutoCreateRowSorter(true);
         panel.add(new JScrollPane(availableFlightsTable), BorderLayout.CENTER);
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton bookFlightButton = new JButton("Prenota Volo Selezionato", new FlatSVGIcon("icons/plus.svg"));
-        bookFlightButton.setFont(new Font(font, Font.BOLD, 14));
+        bookFlightButton.setFont(new Font(userFont, Font.BOLD, 14));
         bookFlightButton.addActionListener(e -> bookSelectedFlightAction());
         buttonPanel.add(bookFlightButton);
         panel.add(buttonPanel, BorderLayout.SOUTH);
@@ -163,7 +170,7 @@ public class UserHomePanel extends JPanel {
         searchPanel.add(new JLabel("Cerca per Nome Passeggero:"));
         searchMyBookingsField = new JTextField(25);
         searchPanel.add(searchMyBookingsField);
-        JButton searchButton = new JButton("Cerca", new FlatSVGIcon("icons/search.svg"));
+        JButton searchButton = new JButton("Cerca", new FlatSVGIcon(searchIcon));
         searchButton.addActionListener(e -> loadMyBookingsData());
         searchPanel.add(searchButton);
         panel.add(searchPanel, BorderLayout.NORTH);
@@ -174,7 +181,7 @@ public class UserHomePanel extends JPanel {
         };
         myBookingsTable = new JTable(myBookingsTableModel);
         myBookingsTable.setRowHeight(28);
-        myBookingsTable.getTableHeader().setFont(new Font(font, Font.BOLD, 14));
+        myBookingsTable.getTableHeader().setFont(new Font(userFont, Font.BOLD, 14));
         myBookingsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         myBookingsTable.setAutoCreateRowSorter(true);
         panel.add(new JScrollPane(myBookingsTable), BorderLayout.CENTER);
@@ -414,7 +421,7 @@ public class UserHomePanel extends JPanel {
     private void performCheckInAction() {
         Prenotazione selectedBooking = getSelectedMyBookingFromTable();
         if (selectedBooking == null) {
-            JOptionPane.showMessageDialog(this, "Seleziona una prenotazione per il Check-In.", "Nessuna Prenotazione Selezionata", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Seleziona una prenotazione per il Check-In.", noBookingSelected, JOptionPane.WARNING_MESSAGE);
             return;
         }
 
@@ -458,7 +465,7 @@ public class UserHomePanel extends JPanel {
     private void modifySelectedBookingAction() {
         Prenotazione selectedBooking = getSelectedMyBookingFromTable();
         if (selectedBooking == null) {
-            JOptionPane.showMessageDialog(this, "Seleziona una prenotazione da modificare.", "Nessuna Prenotazione Selezionata", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Seleziona una prenotazione da modificare.", noBookingSelected, JOptionPane.WARNING_MESSAGE);
             return;
         }
         if (selectedBooking.getStatoPrenotazione() == StatoPrenotazione.CANCELLATA) {
@@ -485,7 +492,7 @@ public class UserHomePanel extends JPanel {
     private void viewOrAddBaggageForSelectedBookingAction() {
         Prenotazione selectedBooking = getSelectedMyBookingFromTable();
         if (selectedBooking == null) {
-            JOptionPane.showMessageDialog(this, "Seleziona una prenotazione per gestire i bagagli.", "Nessuna Prenotazione Selezionata", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Seleziona una prenotazione per gestire i bagagli.", noBookingSelected, JOptionPane.WARNING_MESSAGE);
             return;
         }
 
@@ -525,7 +532,7 @@ public class UserHomePanel extends JPanel {
     private void reportLostBaggageAction() {
         Prenotazione selectedBooking = getSelectedMyBookingFromTable();
         if (selectedBooking == null) {
-            JOptionPane.showMessageDialog(this, "Seleziona una prenotazione per segnalare un bagaglio smarrito.", "Nessuna Prenotazione Selezionata", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Seleziona una prenotazione per segnalare un bagaglio smarrito.", noBookingSelected, JOptionPane.WARNING_MESSAGE);
             return;
         }
 
@@ -570,7 +577,7 @@ public class UserHomePanel extends JPanel {
     private void cancelSelectedBookingAction() {
         Prenotazione selectedBooking = getSelectedMyBookingFromTable();
         if (selectedBooking == null) {
-            JOptionPane.showMessageDialog(this, "Seleziona una prenotazione da cancellare.", "Nessuna Prenotazione Selezionata", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Seleziona una prenotazione da cancellare.", noBookingSelected, JOptionPane.WARNING_MESSAGE);
             return;
         }
         if (selectedBooking.getStatoPrenotazione() == StatoPrenotazione.CANCELLATA) {

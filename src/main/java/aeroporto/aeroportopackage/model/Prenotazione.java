@@ -1,8 +1,5 @@
 package aeroporto.aeroportopackage.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Represents a flight booked by a user.
  * Contains information related to the passengers, the baggage and the flight.
@@ -48,7 +45,9 @@ public class Prenotazione {
     /**
      * Instantiates a new booking.
      */
-    public Prenotazione() {}
+    public Prenotazione() {
+        // è vuoto.
+    }
 
     /**
      * Gets id.

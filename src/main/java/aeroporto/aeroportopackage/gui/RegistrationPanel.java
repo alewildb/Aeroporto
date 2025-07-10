@@ -80,7 +80,7 @@ public class RegistrationPanel extends JPanel {
                 g2.setPaint(paint);
                 g2.fill(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 20, 20));
                 g2.setColor(new Color(210, 215, 220));
-                g2.draw(new RoundRectangle2D.Double(0, 0, getWidth() - 1, getHeight() - 1, 20, 20));
+                g2.draw(new RoundRectangle2D.Double(0, 0, getWidth() - (double)1, getHeight() - (double)1, 20, 20));
                 g2.dispose();
                 super.paintComponent(g);
             }

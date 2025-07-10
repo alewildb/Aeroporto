@@ -11,15 +11,15 @@ public final class DatabaseManager {
     /**
      * The database URL.
      */
-    private static final String DB_URL = "";
+    private static final String DB_URL = "jdbc:postgresql://localhost:5432/Aeroporto";
     /**
      * The database user.
      */
-    private static final String USER = "";
+    private static final String USER = "postgres";
     /**
      * The database password.
      */
-    private static final String PASSWORD = "";
+    private static final String PASSWORD = "porcodio";
 
     /**
      * The database connection.
