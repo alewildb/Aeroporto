@@ -1,0 +1,8 @@
+aeroporto.aeroportopackage
+aeroporto.aeroportopackage.controller
+aeroporto.aeroportopackage.dao
+aeroporto.aeroportopackage.dao.implementations.postgres
+aeroporto.aeroportopackage.database
+aeroporto.aeroportopackage.gui
+aeroporto.aeroportopackage.gui.dialogs
+aeroporto.aeroportopackage.model
